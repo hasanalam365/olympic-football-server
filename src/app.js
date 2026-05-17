@@ -39,6 +39,7 @@ app.use("/", require("./routes/payments.routes"));
 app.use("/", require("./routes/freeSample.routes"));
 
 app.use("/teams", require("./routes/teams.routes"));
+app.use("/players", require("./routes/players.routes"));
 
 
 /* =======================
