@@ -10,9 +10,7 @@ const app = express();
 const corsOptions = {
   origin: [
     "http://localhost:5173",
-    "https://arabian-essense.vercel.app",
-    "https://arabianessence.co.uk",
-    "https://www.arabianessence.co.uk"
+    
   ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
@@ -39,6 +37,8 @@ app.use("/products", require("./routes/products.routes"));
 app.use("/orders", require("./routes/orders.routes"));
 app.use("/", require("./routes/payments.routes"));
 app.use("/", require("./routes/freeSample.routes"));
+
+app.use("/teams", require("./routes/teams.routes"));
 
 
 /* =======================
