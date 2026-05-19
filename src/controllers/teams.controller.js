@@ -162,3 +162,83 @@ exports.searchPlayers =
       console.log(error);
     }
   };
+  // GET SINGLE TEAM
+exports.getSingleTeam =
+  async (req, res) => {
+    try {
+      const id =
+        req.params.id;
+
+      const result =
+        await teamsCollection.findOne(
+          {
+            _id:
+              new ObjectId(
+                id
+              ),
+          }
+        );
+
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+// UPDATE TEAM
+exports.updateTeam =
+  async (req, res) => {
+    try {
+      const id =
+        req.params.id;
+
+      const updatedData =
+        req.body;
+
+      const result =
+        await teamsCollection.updateOne(
+          {
+            _id:
+              new ObjectId(
+                id
+              ),
+          },
+          {
+            $set: {
+              name:
+                updatedData.name,
+
+              shortName:
+                updatedData.shortName,
+
+              owner:
+                updatedData.owner,
+
+              ownerPhone:
+                updatedData.ownerPhone,
+
+              group:
+                updatedData.group,
+
+              logo:
+                updatedData.logo,
+
+              banner:
+                updatedData.banner,
+
+              players:
+                updatedData.players,
+            },
+          }
+        );
+
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+
+      res.status(500).send({
+        message:
+          "Failed to update team",
+      });
+    }
+  };

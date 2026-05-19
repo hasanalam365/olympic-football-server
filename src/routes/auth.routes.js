@@ -6,9 +6,8 @@ const controller = require("../controllers/auth.controller");
 const corsOptions = {
   origin: [
     "http://localhost:5173",
-    "https://arabian-essense.vercel.app",
-    "https://arabianessence.co.uk",
-    "https://www.arabianessence.co.uk"
+    "https://olympic-tournaments.vercel.app",
+   
   ],
   credentials: true,
 };
