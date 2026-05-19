@@ -7,19 +7,41 @@ const controller = require(
   "../controllers/players.controller"
 );
 
-// ADD PLAYER
+/* ======================================
+    ADD PLAYER
+====================================== */
 router.post(
   "/",
   controller.addPlayer
 );
 
-// GET PLAYERS
+/* ======================================
+    GET ALL PLAYERS
+====================================== */
 router.get(
   "/",
   controller.getPlayers
 );
 
-// DELETE PLAYER
+/* ======================================
+    GET SINGLE PLAYER
+====================================== */
+router.get(
+  "/:id",
+  controller.getSinglePlayer
+);
+
+/* ======================================
+    UPDATE PLAYER
+====================================== */
+router.patch(
+  "/:id",
+  controller.updatePlayer
+);
+
+/* ======================================
+    DELETE PLAYER
+====================================== */
 router.delete(
   "/:id",
   controller.deletePlayer
