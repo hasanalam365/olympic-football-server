@@ -7,6 +7,7 @@ const controller = require(
   "../controllers/teams.controller"
 );
 
+/* TEAM CRUD */
 router.post(
   "/",
   controller.addTeam
@@ -22,13 +23,6 @@ router.get(
   controller.searchPlayers
 );
 
-router.delete(
-  "/:id",
-  controller.deleteTeam
-);
-
-module.exports = router;
-
 router.get(
   "/:id",
   controller.getSingleTeam
@@ -38,3 +32,10 @@ router.patch(
   "/:id",
   controller.updateTeam
 );
+
+router.delete(
+  "/:id",
+  controller.deleteTeam
+);
+
+module.exports = router;

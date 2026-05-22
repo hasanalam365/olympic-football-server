@@ -47,7 +47,7 @@ app.use("/players", require("./routes/players.routes"));
    ROOT
 ======================= */
 app.get("/", (req, res) => {
-  res.send("Arabian Essense Server is Working");
+  res.send("Olympic Server is Working");
 });
 
 module.exports = app;
