@@ -1,5 +1,3 @@
-// routes/matches.routes.js
-
 const express =
   require("express");
 
@@ -8,9 +6,15 @@ const router =
 
 const {
   getAllMatches,
+
+  getUpcomingMatches,
+
   getSingleMatch,
+
   addMatch,
+
   updateMatch,
+
   deleteMatch,
 } = require(
   "../controllers/matches.controller"
@@ -19,6 +23,11 @@ const {
 router.get(
   "/",
   getAllMatches
+);
+
+router.get(
+  "/upcoming",
+  getUpcomingMatches
 );
 
 router.get(

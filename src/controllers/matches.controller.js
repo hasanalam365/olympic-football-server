@@ -1,5 +1,3 @@
-// controllers/matches.controller.js
-
 const { ObjectId } =
   require("mongodb");
 
@@ -40,19 +38,49 @@ const getAllMatches =
   };
 
 /* =========================================
+   GET UPCOMING MATCHES
+========================================= */
+const getUpcomingMatches =
+  async (req, res) => {
+    try {
+      const result =
+        await matchCollection
+
+          .find({
+            isUpcoming: true,
+          })
+
+          .limit(2)
+
+          .toArray();
+
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+
+      res.status(500).send({
+        message:
+          "Failed to get upcoming matches",
+      });
+    }
+  };
+
+/* =========================================
    GET SINGLE MATCH
 ========================================= */
 const getSingleMatch =
   async (req, res) => {
     try {
-      const { id } = req.params;
+      const { id } =
+        req.params;
 
       const match =
         await matchCollection.findOne(
           {
-            _id: new ObjectId(
-              id
-            ),
+            _id:
+              new ObjectId(
+                id
+              ),
           }
         );
 
@@ -84,6 +112,11 @@ const addMatch =
 
         awayScore: 0,
 
+        isUpcoming:
+          req.body
+            .isUpcoming ||
+          false,
+
         createdAt:
           new Date(),
       };
@@ -110,7 +143,8 @@ const addMatch =
 const updateMatch =
   async (req, res) => {
     try {
-      const { id } = req.params;
+      const { id } =
+        req.params;
 
       const updatedData =
         req.body;
@@ -118,13 +152,18 @@ const updateMatch =
       const result =
         await matchCollection.updateOne(
           {
-            _id: new ObjectId(
-              id
-            ),
+            _id:
+              new ObjectId(
+                id
+              ),
           },
           {
-            $set:
-              updatedData,
+            $set: {
+              ...updatedData,
+
+              isUpcoming:
+                updatedData.isUpcoming,
+            },
           }
         );
 
@@ -145,14 +184,16 @@ const updateMatch =
 const deleteMatch =
   async (req, res) => {
     try {
-      const { id } = req.params;
+      const { id } =
+        req.params;
 
       const result =
         await matchCollection.deleteOne(
           {
-            _id: new ObjectId(
-              id
-            ),
+            _id:
+              new ObjectId(
+                id
+              ),
           }
         );
 
@@ -169,8 +210,14 @@ const deleteMatch =
 
 module.exports = {
   getAllMatches,
+
+  getUpcomingMatches,
+
   getSingleMatch,
+
   addMatch,
+
   updateMatch,
+
   deleteMatch,
 };
