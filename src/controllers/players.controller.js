@@ -1,6 +1,7 @@
 const { ObjectId } = require("mongodb");
 
-const client = require("../config/db");
+const client =
+  require("../config/db");
 
 const playersCollection =
   client
@@ -13,8 +14,27 @@ const playersCollection =
 exports.addPlayer =
   async (req, res) => {
     try {
-      const playerData =
-        req.body;
+      const playerData = {
+        ...req.body,
+
+        totalGoals:
+          req.body
+            .totalGoals || 0,
+
+        yellowCards:
+          req.body
+            .yellowCards || 0,
+
+        redCards:
+          req.body
+            .redCards || 0,
+
+        match:
+          req.body.match || 0,
+
+        createdAt:
+          new Date(),
+      };
 
       const result =
         await playersCollection.insertOne(
@@ -40,7 +60,14 @@ exports.getPlayers =
     try {
       const result =
         await playersCollection
+
+          /* SORT BY GOALS */
           .find()
+
+          .sort({
+            totalGoals: -1,
+          })
+
           .toArray();
 
       res.send(result);
@@ -105,8 +132,29 @@ exports.updatePlayer =
               ),
           },
           {
-            $set:
-              updatedData,
+            $set: {
+              ...updatedData,
+
+              totalGoals:
+                Number(
+                  updatedData.totalGoals || 0
+                ),
+
+              yellowCards:
+                Number(
+                  updatedData.yellowCards || 0
+                ),
+
+              redCards:
+                Number(
+                  updatedData.redCards || 0
+                ),
+
+              match:
+                Number(
+                  updatedData.match || 0
+                ),
+            },
           }
         );
 
