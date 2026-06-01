@@ -1,97 +1,90 @@
 const { ObjectId } = require("mongodb");
 
-const client = require("../config/db");
+const client =
+  require("../config/db");
 
-const teamsCollection = client
-  .db("olympicTournament")
-  .collection("teams");
+const teamsCollection =
+  client
+    .db("olympicTournament")
+    .collection("teams");
 
-const playersCollection = client
-  .db("olympicTournament")
-  .collection("players");
+const playersCollection =
+  client
+    .db("olympicTournament")
+    .collection("players");
 
 /* =========================================
    ADD TEAM
 ========================================= */
-exports.addTeam = async (req, res) => {
-  try {
-    const teamData = req.body;
+exports.addTeam =
+  async (req, res) => {
+    try {
+      const teamData =
+        req.body;
 
-    const selectedPlayers =
-      teamData.players || [];
+      const selectedPlayers =
+        teamData.players || [];
 
-    // DEFAULT STATS
-    const newTeam = {
-      ...teamData,
+      const newTeam = {
+        ...teamData,
 
-      match:
-        teamData.match || 0,
+        match: 0,
+        win: 0,
+        draw: 0,
+        lose: 0,
+        totalGoals: 0,
+        points: 0,
 
-      win:
-        teamData.win || 0,
+        createdAt:
+          new Date(),
+      };
 
-      draw:
-        teamData.draw || 0,
-
-      lose:
-        teamData.lose || 0,
-
-      totalGoals:
-        teamData.totalGoals || 0,
-
-      points:
-        teamData.points || 0,
-
-      createdAt:
-        new Date(),
-    };
-
-    // SAVE TEAM
-    const result =
-      await teamsCollection.insertOne(
-        newTeam
-      );
-
-    // UPDATE PLAYER TEAM HISTORY
-    if (
-      selectedPlayers.length > 0
-    ) {
-      for (const player of selectedPlayers) {
-        await playersCollection.updateOne(
-          {
-            _id: new ObjectId(
-              player._id
-            ),
-          },
-          {
-            $push: {
-              teamMembers: {
-                teamName:
-                  teamData.name,
-
-                year:
-                  new Date().getFullYear(),
-
-                goals: 0,
-
-                match: 0,
-              },
-            },
-          }
+      const result =
+        await teamsCollection.insertOne(
+          newTeam
         );
+
+      if (
+        selectedPlayers.length >
+        0
+      ) {
+        for (const player of selectedPlayers) {
+          await playersCollection.updateOne(
+            {
+              _id:
+                new ObjectId(
+                  player._id
+                ),
+            },
+            {
+              $push: {
+                teamMembers: {
+                  teamName:
+                    teamData.name,
+
+                  year:
+                    new Date().getFullYear(),
+
+                  goals: 0,
+
+                  match: 0,
+                },
+              },
+            }
+          );
+        }
       }
+
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+
+      res.status(500).send({
+        message:
+          "Failed to add team",
+      });
     }
-
-    res.send(result);
-  } catch (error) {
-    console.log(error);
-
-    res.status(500).send({
-      message:
-        "Failed to add team",
-    });
-  }
-};
+  };
 
 /* =========================================
    GET ALL TEAMS
@@ -112,6 +105,11 @@ exports.getTeams =
       res.send(result);
     } catch (error) {
       console.log(error);
+
+      res.status(500).send({
+        message:
+          "Failed to fetch teams",
+      });
     }
   };
 
@@ -135,6 +133,11 @@ exports.getSingleTeam =
       res.send(result);
     } catch (error) {
       console.log(error);
+
+      res.status(500).send({
+        message:
+          "Failed to fetch team",
+      });
     }
   };
 
@@ -150,11 +153,14 @@ exports.updateTeam =
       const updatedData =
         req.body;
 
-      // POINT CALCULATION
       const points =
-        Number(updatedData.win || 0) *
+        Number(
+          updatedData.win || 0
+        ) *
           3 +
-        Number(updatedData.draw || 0);
+        Number(
+          updatedData.draw || 0
+        );
 
       const result =
         await teamsCollection.updateOne(
@@ -188,21 +194,25 @@ exports.updateTeam =
               players:
                 updatedData.players,
 
-              match: Number(
-                updatedData.match
-              ),
+              match:
+                Number(
+                  updatedData.match
+                ),
 
-              win: Number(
-                updatedData.win
-              ),
+              win:
+                Number(
+                  updatedData.win
+                ),
 
-              draw: Number(
-                updatedData.draw
-              ),
+              draw:
+                Number(
+                  updatedData.draw
+                ),
 
-              lose: Number(
-                updatedData.lose
-              ),
+              lose:
+                Number(
+                  updatedData.lose
+                ),
 
               totalGoals:
                 Number(
@@ -245,6 +255,11 @@ exports.deleteTeam =
       res.send(result);
     } catch (error) {
       console.log(error);
+
+      res.status(500).send({
+        message:
+          "Failed to delete team",
+      });
     }
   };
 
@@ -261,15 +276,18 @@ exports.searchPlayers =
         $or: [
           {
             name: {
-              $regex: search,
-              $options: "i",
+              $regex:
+                search,
+              $options:
+                "i",
             },
           },
-
           {
             phoneNumber: {
-              $regex: search,
-              $options: "i",
+              $regex:
+                search,
+              $options:
+                "i",
             },
           },
         ],
@@ -284,5 +302,10 @@ exports.searchPlayers =
       res.send(result);
     } catch (error) {
       console.log(error);
+
+      res.status(500).send({
+        message:
+          "Failed to search players",
+      });
     }
   };
