@@ -133,7 +133,19 @@ exports.updatePlayer =
           },
           {
             $set: {
-              ...updatedData,
+              name:
+                updatedData.name,
+
+              age:
+                Number(
+                  updatedData.age
+                ),
+
+              phoneNumber:
+                updatedData.phoneNumber,
+
+              bloodGroup:
+                updatedData.bloodGroup,
 
               totalGoals:
                 Number(
@@ -154,6 +166,12 @@ exports.updatePlayer =
                 Number(
                   updatedData.match || 0
                 ),
+
+              photo:
+                updatedData.photo,
+
+              teamMembers:
+                updatedData.teamMembers,
             },
           }
         );
