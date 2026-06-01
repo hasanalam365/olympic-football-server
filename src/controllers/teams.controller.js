@@ -309,3 +309,24 @@ exports.searchPlayers =
       });
     }
   };
+ exports.getTeamByName =
+  async (req, res) => {
+    try {
+      const teamName =
+        req.params.name.trim();
+
+      const result =
+        await teamsCollection.findOne({
+          name: teamName,
+        });
+
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+
+      res.status(500).send({
+        message:
+          "Failed to fetch team",
+      });
+    }
+  };

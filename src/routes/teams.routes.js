@@ -24,9 +24,16 @@ router.get(
 );
 
 router.get(
+  "/team-name/:name",
+  controller.getTeamByName
+);
+
+router.get(
   "/:id",
   controller.getSingleTeam
 );
+
+
 
 router.patch(
   "/:id",
@@ -37,5 +44,7 @@ router.delete(
   "/:id",
   controller.deleteTeam
 );
+
+
 
 module.exports = router;
