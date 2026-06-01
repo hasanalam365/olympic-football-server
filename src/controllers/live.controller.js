@@ -1,225 +1,302 @@
-const {
-  ObjectId,
-} = require("mongodb");
+const { ObjectId } = require("mongodb");
+const client = require("../config/db");
 
-const client =
-  require("../config/db");
+const liveCollection = client
+  .db("olympicTournament")
+  .collection("liveMatches");
 
-const liveCollection =
-  client
-    .db(
-      "olympicTournament"
-    )
-    .collection(
-      "liveMatches"
+const matchCollection = client
+  .db("olympicTournament")
+  .collection("matches");
+
+const teamsCollection = client
+  .db("olympicTournament")
+  .collection("teams");
+
+/* =========================
+   START LIVE MATCH
+========================= */
+
+exports.startLiveMatch = async (req, res) => {
+  try {
+    const { matchId } = req.body;
+
+    const match =
+      await matchCollection.findOne({
+        _id: new ObjectId(matchId),
+      });
+
+    if (!match) {
+      return res.status(404).send({
+        message: "Match not found",
+      });
+    }
+
+    const homeTeam =
+      await teamsCollection.findOne({
+        name: match.homeTeam,
+      });
+
+    const awayTeam =
+      await teamsCollection.findOne({
+        name: match.awayTeam,
+      });
+
+    // Previous live match stop
+    await liveCollection.updateMany(
+      {
+        status: "LIVE",
+      },
+      {
+        $set: {
+          status: "Finished",
+          isRunning: false,
+        },
+      }
     );
 
-const matchCollection =
-  client
-    .db(
-      "olympicTournament"
-    )
-    .collection("matches");
+    const liveData = {
+      matchId,
 
-const teamsCollection =
-  client
-    .db(
-      "olympicTournament"
-    )
-    .collection("teams");
+      homeTeam: match.homeTeam,
+      awayTeam: match.awayTeam,
 
-exports.startLiveMatch =
+      homePlayers:
+        homeTeam?.players || [],
+
+      awayPlayers:
+        awayTeam?.players || [],
+
+      homeScore: 0,
+      awayScore: 0,
+
+      timerSeconds: 0,
+      isRunning: false,
+
+      minute: 0,
+
+      status: "LIVE",
+
+      goals: [],
+      yellowCards: [],
+      redCards: [],
+
+      createdAt: new Date(),
+    };
+
+    const result =
+      await liveCollection.insertOne(
+        liveData
+      );
+
+    res.send({
+      insertedId:
+        result.insertedId,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).send({
+      message:
+        "Failed to start live match",
+    });
+  }
+};
+
+/* =========================
+   GET SINGLE LIVE MATCH
+========================= */
+
+exports.getLiveMatch = async (
+  req,
+  res
+) => {
+  try {
+    const result =
+      await liveCollection.findOne({
+        _id: new ObjectId(
+          req.params.id
+        ),
+      });
+
+    res.send(result);
+  } catch (error) {
+    res.status(500).send({
+      message:
+        "Failed to fetch live match",
+    });
+  }
+};
+
+/* =========================
+   CURRENT LIVE MATCH
+========================= */
+
+exports.getCurrentLiveMatch =
   async (req, res) => {
     try {
-      const {
-        matchId,
-      } = req.body;
-
-      const match =
-        await matchCollection.findOne(
-          {
-            _id:
-              new ObjectId(
-                matchId
-              ),
-          }
-        );
-
-      const homeTeam =
-        await teamsCollection.findOne(
-          {
-            name:
-              match.homeTeam,
-          }
-        );
-
-      const awayTeam =
-        await teamsCollection.findOne(
-          {
-            name:
-              match.awayTeam,
-          }
-        );
-
-      const liveData = {
-        matchId,
-
-        homeTeam:
-          match.homeTeam,
-
-        awayTeam:
-          match.awayTeam,
-
-        homePlayers:
-          homeTeam?.players ||
-          [],
-
-        awayPlayers:
-          awayTeam?.players ||
-          [],
-
-        homeScore: 0,
-        awayScore: 0,
-
-        minute: 0,
-
-        status: "live",
-
-        goals: [],
-
-        yellowCards:
-          [],
-
-        redCards: [],
-
-        createdAt:
-          new Date(),
-      };
-
       const result =
-        await liveCollection.insertOne(
-          liveData
+        await liveCollection.findOne(
+          {
+            status: "LIVE",
+          },
+          {
+            sort: {
+              createdAt: -1,
+            },
+          }
         );
 
-      res.send({
-        insertedId:
-          result.insertedId,
+      res.send(result || null);
+    } catch (error) {
+      res.status(500).send({
+        message:
+          "Failed to fetch current live match",
       });
-    } catch (
-      error
-    ) {
-      res
-        .status(500)
-        .send(error);
     }
   };
 
-exports.getLiveMatch =
-  async (req, res) => {
-    const result =
-      await liveCollection.findOne(
-        {
-          _id:
-            new ObjectId(
-              req.params.id
-            ),
-        }
-      );
+/* =========================
+   UPDATE SCORE
+========================= */
 
-    res.send(result);
-  };
-
-exports.updateScore =
-  async (req, res) => {
+exports.updateScore = async (
+  req,
+  res
+) => {
+  try {
     const result =
       await liveCollection.updateOne(
         {
-          _id:
-            new ObjectId(
-              req.params.id
-            ),
+          _id: new ObjectId(
+            req.params.id
+          ),
         },
         {
-          $set:
-            req.body,
+          $set: req.body,
         }
       );
 
     res.send(result);
-  };
+  } catch (error) {
+    res.status(500).send({
+      message:
+        "Failed to update score",
+    });
+  }
+};
 
-exports.addGoal =
-  async (req, res) => {
+/* =========================
+   ADD GOAL
+========================= */
+
+exports.addGoal = async (
+  req,
+  res
+) => {
+  try {
     const result =
       await liveCollection.updateOne(
         {
-          _id:
-            new ObjectId(
-              req.params.id
-            ),
+          _id: new ObjectId(
+            req.params.id
+          ),
         },
         {
           $push: {
-            goals:
-              req.body,
+            goals: req.body,
           },
         }
       );
 
     res.send(result);
-  };
+  } catch (error) {
+    res.status(500).send({
+      message:
+        "Failed to add goal",
+    });
+  }
+};
+
+/* =========================
+   YELLOW CARD
+========================= */
 
 exports.addYellowCard =
   async (req, res) => {
+    try {
+      const result =
+        await liveCollection.updateOne(
+          {
+            _id:
+              new ObjectId(
+                req.params.id
+              ),
+          },
+          {
+            $push: {
+              yellowCards:
+                req.body,
+            },
+          }
+        );
+
+      res.send(result);
+    } catch (error) {
+      res.status(500).send({
+        message:
+          "Failed to add yellow card",
+      });
+    }
+  };
+
+/* =========================
+   RED CARD
+========================= */
+
+exports.addRedCard = async (
+  req,
+  res
+) => {
+  try {
     const result =
       await liveCollection.updateOne(
         {
-          _id:
-            new ObjectId(
-              req.params.id
-            ),
+          _id: new ObjectId(
+            req.params.id
+          ),
         },
         {
           $push: {
-            yellowCards:
-              req.body,
+            redCards: req.body,
           },
         }
       );
 
     res.send(result);
-  };
+  } catch (error) {
+    res.status(500).send({
+      message:
+        "Failed to add red card",
+    });
+  }
+};
 
-exports.addRedCard =
-  async (req, res) => {
+/* =========================
+   TIMER UPDATE
+========================= */
+
+exports.updateTimer = async (
+  req,
+  res
+) => {
+  try {
     const result =
       await liveCollection.updateOne(
         {
-          _id:
-            new ObjectId(
-              req.params.id
-            ),
-        },
-        {
-          $push: {
-            redCards:
-              req.body,
-          },
-        }
-      );
-
-    res.send(result);
-  };
-
-  exports.updateTimer =
-  async (req, res) => {
-    const result =
-      await liveCollection.updateOne(
-        {
-          _id:
-            new ObjectId(
-              req.params.id
-            ),
+          _id: new ObjectId(
+            req.params.id
+          ),
         },
         {
           $set: {
@@ -239,4 +316,10 @@ exports.addRedCard =
       );
 
     res.send(result);
-  };
+  } catch (error) {
+    res.status(500).send({
+      message:
+        "Failed to update timer",
+    });
+  }
+};

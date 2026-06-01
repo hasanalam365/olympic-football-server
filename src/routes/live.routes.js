@@ -1,24 +1,27 @@
-const express =
-  require("express");
-
-const router =
-  express.Router();
+const express = require("express");
+const router = express.Router();
 
 const {
   startLiveMatch,
   getLiveMatch,
+  getCurrentLiveMatch,
   updateScore,
   addGoal,
   addYellowCard,
   addRedCard,
+  updateTimer,
 } = require(
   "../controllers/live.controller"
 );
-const { updateTimer } = require("../controllers/live.controller");
 
 router.post(
   "/start",
   startLiveMatch
+);
+
+router.get(
+  "/current",
+  getCurrentLiveMatch
 );
 
 router.get(
@@ -51,5 +54,4 @@ router.patch(
   updateTimer
 );
 
-module.exports =
-  router;
+module.exports = router;
