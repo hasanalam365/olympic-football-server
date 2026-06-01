@@ -140,43 +140,40 @@ const addMatch =
 /* =========================================
    UPDATE MATCH
 ========================================= */
-const updateMatch =
-  async (req, res) => {
-    try {
-      const { id } =
-        req.params;
+const updateMatch = async (
+  req,
+  res
+) => {
+  try {
+    const { id } = req.params;
 
-      const updatedData =
-        req.body;
+    const updatedData = {
+      ...req.body,
+    };
 
-      const result =
-        await matchCollection.updateOne(
-          {
-            _id:
-              new ObjectId(
-                id
-              ),
-          },
-          {
-            $set: {
-              ...updatedData,
+    delete updatedData._id;
 
-              isUpcoming:
-                updatedData.isUpcoming,
-            },
-          }
-        );
+    const result =
+      await matchCollection.updateOne(
+        {
+          _id:
+            new ObjectId(id),
+        },
+        {
+          $set: updatedData,
+        }
+      );
 
-      res.send(result);
-    } catch (error) {
-      console.log(error);
+    res.send(result);
+  } catch (error) {
+    console.log(error);
 
-      res.status(500).send({
-        message:
-          "Failed to update match",
-      });
-    }
-  };
+    res.status(500).send({
+      message:
+        "Failed to update match",
+    });
+  }
+};
 
 /* =========================================
    DELETE MATCH
